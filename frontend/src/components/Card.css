@@ -1,0 +1,99 @@
+.unique-card {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: 1px solid rgba(189, 232, 245, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Shimmer Effect */
+.card-shimmer {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(189, 232, 245, 0.3) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.unique-card:hover .card-shimmer {
+  transform: translateX(100%) translateY(100%) rotate(45deg);
+}
+
+/* Border Gradient Animation */
+.card-border-gradient {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-light),
+    var(--primary-medium),
+    var(--primary-dark),
+    var(--primary-medium),
+    var(--primary-light)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
+
+.unique-card:hover .card-border-gradient {
+  opacity: 1;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Glow Effect */
+.glow-effect {
+  box-shadow: 0 0 30px rgba(73, 136, 196, 0.4);
+}
+
+.glow-effect:hover {
+  box-shadow: 0 0 50px rgba(73, 136, 196, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .unique-card {
+    padding: 1.5rem;
+  }
+}
