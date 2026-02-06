@@ -1,5 +1,7 @@
 # KKBP - Kambaa Knowledge Base Portal
 
+> Version 1.0.0 | Last Updated: February 2026
+
 A modern, interactive knowledge base portal for internal team collaboration with unique animations and a professional design system.
 
 ## Features
@@ -201,3 +203,7 @@ ISC
 ## Support
 
 For issues or questions, please contact the development team.
+
+---
+
+**Built with ❤️ by Kambaa Team**
