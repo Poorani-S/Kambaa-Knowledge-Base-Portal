@@ -4,27 +4,56 @@
 
 ## Complete Setup Instructions
 
-### Step 1: Install MySQL (if not already installed)
+### Step 1: Install MongoDB (if not already installed)
 
-**Recommended Version:** MySQL 8.0 or higher
+**Recommended Version:** MongoDB 6.0 or higher
 
-1. Download MySQL Community Server from: https://dev.mysql.com/downloads/mysql/
-2. Install and remember your root password
-3. Start MySQL service
-4. Verify installation: `mysql --version`
+#### Option A: MongoDB Community Server
 
-### Step 2: Create Database
+1. Download MongoDB Community Server from: https://www.mongodb.com/try/download/community
+2. Install MongoDB (choose "Complete" installation)
+3. MongoDB Compass (GUI) will be installed automatically
+4. Start MongoDB service
 
-Open MySQL command line or MySQL Workbench and run:
+#### Option B: MongoDB Atlas (Cloud - Free Tier)
 
-```sql
-CREATE DATABASE kkbp_db;
-```
+1. Create a free account at: https://www.mongodb.com/cloud/atlas/register
+2. Create a free cluster (M0 Sandbox)
+3. Get your connection string
+4. Skip to Step 3 and use the Atlas connection string
 
-Or use the provided SQL script:
+#### Verify Installation
 
 ```bash
-mysql -u root -p < backend/database/setup.sql
+# Check MongoDB version
+mongod --version
+
+# Check if MongoDB is running
+Get-Service MongoDB
+```
+
+### Step 2: Start MongoDB (Local Installation Only)
+
+#### Windows:
+
+MongoDB should start automatically. If not:
+
+```powershell
+# Start MongoDB service (Run as Administrator)
+Start-Service MongoDB
+
+# Or start manually
+net start MongoDB
+```
+
+#### Verify MongoDB is Running:
+
+```bash
+# Connect to MongoDB shell
+mongosh
+
+# You should see MongoDB shell prompt
+# Type 'exit' to quit
 ```
 
 ### Step 3: Configure Backend
@@ -35,22 +64,26 @@ mysql -u root -p < backend/database/setup.sql
 cd backend
 ```
 
-2. The `.env` file is already created. Update it if needed:
+2. Update `.env` file if needed:
 
 ```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=YOUR_MYSQL_PASSWORD  # Update this!
-DB_NAME=kkbp_db
+# For local MongoDB
+MONGODB_URI=mongodb://127.0.0.1:27017/kkbp
+
+# For MongoDB Atlas (if using cloud)
+# MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/kkbp?retryWrites=true&w=majority
+
+JWT_SECRET=kambaa_kb_portal_secret_key_2026
+PORT=5000
 ```
 
-3. Install dependencies (already done):
+3. Install dependencies:
 
 ```bash
 npm install
 ```
 
-4. Seed the database (creates tables and sample data):
+4. Seed the database (creates collections and sample data):
 
 ```bash
 npm run seed
@@ -60,7 +93,8 @@ Expected output:
 
 ```
 🌱 Seeding database...
-✅ Database synced
+✅ MongoDB connected
+✅ Database cleared
 ✅ Admin user created
 ✅ Employee users created
 ✅ Categories created
@@ -92,10 +126,8 @@ npm run dev
 You should see:
 
 ```
-✅ Database connection established successfully
-✅ Database synchronized
+✅ MongoDB connected
 🚀 Server running on port 5000
-📝 Environment: development
 ```
 
 ### Step 5: Start Frontend
@@ -104,6 +136,7 @@ Open a NEW terminal window:
 
 ```bash
 cd frontend
+npm install
 npm start
 ```
 
@@ -138,9 +171,10 @@ The app will open at: http://localhost:3000
 
 ### Backend won't start
 
-- Check if MySQL is running
-- Verify database credentials in `.env`
-- Make sure port 5000 is not in use
+- **Check if MongoDB is running**: `Get-Service MongoDB`
+- **Start MongoDB**: `Start-Service MongoDB` (as Administrator)
+- **Verify connection string** in `.env`
+- **Make sure port 5000 is not in use**
 
 ### Frontend won't start
 
@@ -148,16 +182,32 @@ The app will open at: http://localhost:3000
 - Check if port 3000 is available
 - Try `npm install` again
 
-### Database connection error
+### MongoDB connection error
 
-- Check MySQL service is running
-- Verify DB_USER and DB_PASSWORD in `.env`
-- Ensure database `kkbp_db` exists
+**Error:** `MongooseServerSelectionError`
+
+**Solutions:**
+
+- Check MongoDB service is running: `Get-Service MongoDB`
+- Start the service: `Start-Service MongoDB` (as Administrator)
+- Verify MONGODB_URI in `.env`
+- Check if port 27017 is available
+- For Atlas: Whitelist your IP address in MongoDB Atlas dashboard
 
 ### "Email must be @kambaa.in" error
 
 - The system only accepts emails ending with @kambaa.in
 - This is a requirement for the project
+
+### Port already in use
+
+```bash
+# Find process using port 5000
+netstat -ano | findstr :5000
+
+# Kill the process (replace <PID> with actual process ID)
+taskkill /PID <PID> /F
+```
 
 ## Quick Commands Reference
 
@@ -177,9 +227,54 @@ npm start            # Start dev server
 # Windows Quick Start
 start-backend.bat    # Start backend
 start-frontend.bat   # Start frontend
+quick-start.bat      # Start both automatically
 ```
 
-## Default Categories Created
+## MongoDB Management
+
+### Using MongoDB Compass (GUI)
+
+1. Open MongoDB Compass
+2. Connect to: `mongodb://127.0.0.1:27017`
+3. Browse database: `kkbp`
+4. View collections: `users`, `articles`, `categories`, `tags`
+
+### Using MongoDB Shell
+
+```bash
+# Connect to MongoDB
+mongosh
+
+# Switch to KKBP database
+use kkbp
+
+# View all collections
+show collections
+
+# Query users
+db.users.find().pretty()
+
+# Query articles
+db.articles.find().pretty()
+
+# Exit
+exit
+```
+
+### Reset Database
+
+To completely reset and reseed:
+
+```bash
+cd backend
+npm run seed
+```
+
+This will drop all collections and recreate with fresh data.
+
+## Default Data Created
+
+### Categories
 
 - Technology
 - Development
@@ -188,28 +283,55 @@ start-frontend.bat   # Start frontend
 - Tutorials
 - Documentation
 
+### Users
+
+- Admin: `admin@kambaa.in` / `admin123`
+- Employee: `john.doe@kambaa.in` / `employee123`
+- Employee: `jane.smith@kambaa.in` / `employee123`
+
 ## Project URLs
 
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 - API Health Check: http://localhost:5000/
+- MongoDB Compass: `mongodb://127.0.0.1:27017`
 
 ## Next Steps
 
-1. ✅ Create database
-2. ✅ Seed data
-3. ✅ Start backend
-4. ✅ Start frontend
-5. ✅ Login and test
-6. 🎉 Start using the Knowledge Base!
+1. ✅ Install MongoDB
+2. ✅ Start MongoDB service
+3. ✅ Configure backend
+4. ✅ Seed database
+5. ✅ Start backend
+6. ✅ Start frontend
+7. ✅ Login and test
+8. 🎉 Start using the Knowledge Base!
 
 ---
 
 ## Need More Help?
 
-Refer to:
+### Additional Resources
 
-- [MySQL Setup Guide](MYSQL_SETUP.md) - Detailed MySQL troubleshooting
+- [MongoDB Documentation](https://docs.mongodb.com/)
+- [MongoDB Compass Guide](https://docs.mongodb.com/compass/)
+- [Mongoose Documentation](https://mongoosejs.com/)
 - [Main README](README.md) - Project overview and API documentation
+
+### Common MongoDB Commands
+
+```bash
+# Check MongoDB status
+Get-Service MongoDB
+
+# Start MongoDB
+Start-Service MongoDB
+
+# Stop MongoDB
+Stop-Service MongoDB
+
+# Restart MongoDB
+Restart-Service MongoDB
+```
 
 **Built with ❤️ by Kambaa Team**

@@ -1,13 +1,13 @@
 @echo off
 echo ========================================
-echo KKBP Quick Start (Without MySQL Setup)
+echo KKBP Quick Start
 echo ========================================
 echo.
 echo This script will:
-echo 1. Start the backend (auto-creates tables)
-echo 2. Start the frontend
+echo 1. Start the backend server
+echo 2. Start the frontend app
 echo.
-echo NOTE: Make sure MySQL is running first!
+echo NOTE: Make sure MongoDB is running first!
 echo.
 echo Press Ctrl+C to cancel, or
 pause

@@ -23,18 +23,20 @@ cp .env.example .env
 
 Update the following in `.env`:
 
-- `DB_HOST` - MySQL host (default: localhost)
-- `DB_USER` - MySQL username (default: root)
-- `DB_PASSWORD` - MySQL password
-- `DB_NAME` - Database name (default: kkbp_db)
+- `MONGODB_URI` - MongoDB connection string (default: mongodb://127.0.0.1:27017/kkbp)
 - `JWT_SECRET` - Secret key for JWT tokens
+- `PORT` - Server port (default: 5000)
 
 ### 3. Setup Database
 
-Make sure MySQL is running and create the database:
+Make sure MongoDB is running:
 
-```sql
-CREATE DATABASE kkbp_db;
+```bash
+# Check MongoDB status
+Get-Service MongoDB
+
+# Start MongoDB if needed
+Start-Service MongoDB
 ```
 
 ### 4. Seed Database
@@ -49,7 +51,8 @@ This will create:
 
 - Admin user: `admin@kambaa.in` / `admin123`
 - Employee users: `john.doe@kambaa.in` / `employee123`
-- Sample categories
+- Employee: `jane.smith@kambaa.in` / `employee123`
+- Sample categories (Technology, Development, Design, etc.)
 
 ### 5. Start Server
 
@@ -99,7 +102,7 @@ Server will run on http://localhost:5000
 ## Technologies
 
 - Node.js / Express
-- MySQL with Sequelize ORM
+- MongoDB with Mongoose ODM
 - JWT for authentication
 - bcryptjs for password hashing
 

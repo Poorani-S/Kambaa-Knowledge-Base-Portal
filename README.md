@@ -40,17 +40,17 @@ KKBP/
 ### Prerequisites
 
 - Node.js (v14 or higher)
-- MySQL (v5.7 or higher)
+- MongoDB (v6.0 or higher)
 - npm or yarn
 
 ### 1. Setup Database
 
 ```bash
-# Login to MySQL
-mysql -u root -p
+# Make sure MongoDB is running
+Get-Service MongoDB
 
-# Create database
-CREATE DATABASE kkbp_db;
+# Or start MongoDB
+Start-Service MongoDB
 ```
 
 ### 2. Backend Setup
@@ -63,11 +63,9 @@ npm install
 Configure `.env` file (already created with defaults):
 
 ```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=kkbp_db
+MONGODB_URI=mongodb://127.0.0.1:27017/kkbp
 JWT_SECRET=kambaa_kb_portal_secret_key_2026
+PORT=5000
 ```
 
 Seed the database:
@@ -163,7 +161,7 @@ After seeding the database:
 ### Backend
 
 - Node.js / Express
-- MySQL with Sequelize ORM
+- MongoDB with Mongoose ODM
 - JWT Authentication
 - bcryptjs (password hashing)
 
