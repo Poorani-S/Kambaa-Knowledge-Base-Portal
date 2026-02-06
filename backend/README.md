@@ -1,5 +1,7 @@
 # KKBP Backend API
 
+> Version 1.0.0 | Last Updated: February 6, 2026
+
 Backend API server for Kambaa Knowledge Base Portal
 
 ## Setup Instructions
@@ -100,3 +102,7 @@ Server will run on http://localhost:5000
 - MySQL with Sequelize ORM
 - JWT for authentication
 - bcryptjs for password hashing
+
+---
+
+**Built with ❤️ by Kambaa Team**

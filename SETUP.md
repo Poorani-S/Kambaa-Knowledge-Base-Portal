@@ -1,12 +1,17 @@
 # KKBP Setup Guide
 
+> Version 1.0.0 | Last Updated: February 6, 2026
+
 ## Complete Setup Instructions
 
 ### Step 1: Install MySQL (if not already installed)
 
+**Recommended Version:** MySQL 8.0 or higher
+
 1. Download MySQL Community Server from: https://dev.mysql.com/downloads/mysql/
 2. Install and remember your root password
 3. Start MySQL service
+4. Verify installation: `mysql --version`
 
 ### Step 2: Create Database
 
@@ -197,3 +202,14 @@ start-frontend.bat   # Start frontend
 4. ✅ Start frontend
 5. ✅ Login and test
 6. 🎉 Start using the Knowledge Base!
+
+---
+
+## Need More Help?
+
+Refer to:
+
+- [MySQL Setup Guide](MYSQL_SETUP.md) - Detailed MySQL troubleshooting
+- [Main README](README.md) - Project overview and API documentation
+
+**Built with ❤️ by Kambaa Team**

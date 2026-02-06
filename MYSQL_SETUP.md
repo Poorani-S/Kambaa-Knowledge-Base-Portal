@@ -1,5 +1,7 @@
 # MySQL Setup Guide for KKBP
 
+> Version 1.0.0 | Last Updated: February 6, 2026
+
 ## Issue: "CREATE : The term 'CREATE' is not recognized"
 
 This error occurs because you're trying to run SQL commands directly in PowerShell. SQL commands need to be run inside MySQL.
@@ -79,13 +81,16 @@ Start-Service MySQL
 
 ## If MySQL is Not Installed
 
+**Recommended Version:** MySQL 8.0 or higher
+
 Download and install from: https://dev.mysql.com/downloads/mysql/
 
 During installation:
 
-- Choose "Developer Default"
-- Set root password (remember it!)
+- Choose "Developer Default" for full features
+- Set root password (remember it!) - Write it down securely
 - Keep default port (3306)
+- Enable "Start MySQL Server at System Startup" for convenience
 
 ## Update Database Password
 
@@ -158,7 +163,18 @@ Once database is ready:
 
 If you're still having issues:
 
-1. Check if MySQL service is running
+1. Check if MySQL service is running: `Get-Service MySQL*`
 2. Verify password in `backend/.env`
 3. Try running `setup-database.bat`
 4. Check MySQL logs for errors
+5. Restart MySQL service: `Restart-Service MySQL80` (as Administrator)
+
+## Additional Resources
+
+- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [Sequelize Documentation](https://sequelize.org/)
+- [Main Setup Guide](SETUP.md)
+
+---
+
+**Built with ❤️ by Kambaa Team**
