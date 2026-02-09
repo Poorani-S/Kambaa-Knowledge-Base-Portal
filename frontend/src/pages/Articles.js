@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
-  Filter,
   SlidersHorizontal,
   X,
   Clock,
@@ -11,10 +10,12 @@ import {
 } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 import "./Articles.css";
 
 const Articles = () => {
+  const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -117,9 +118,11 @@ const Articles = () => {
             </p>
           </div>
 
-          <Button variant="primary" onClick={() => navigate("/submit")}>
-            Submit Article
-          </Button>
+          {!isAdmin && (
+            <Button variant="primary" onClick={() => navigate("/submit")}>
+              Submit Article
+            </Button>
+          )}
         </motion.div>
 
         {/* Search and Filters */}

@@ -18,6 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/articles", require("./routes/articleRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
+app.use("/api/chatbot", require("./routes/chatbotRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 // Root route
 app.get("/", (req, res) => {

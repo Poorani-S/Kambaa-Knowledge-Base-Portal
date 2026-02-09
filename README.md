@@ -1,207 +1,158 @@
-# KKBP - Kambaa Knowledge Base Portal
+# Kambaa Knowledge Base Portal
 
-> Version 1.0.0 | Last Updated: February 2026
-
-A modern, interactive knowledge base portal for internal team collaboration with unique animations and a professional design system.
+Enterprise-grade internal knowledge management system with AI-powered search and admin dashboard.
 
 ## Features
 
-- 🎨 **Unique Design** - Custom color palette (1C4D8D, 4988C4, BDE8F5) with engaging animations
-- 🔐 **Secure Authentication** - @kambaa.in email domain validation
-- 📝 **Article Management** - Create, submit, and manage knowledge base articles
-- ✅ **Approval Workflow** - Admin-only article approval system
-- 🏢 **Role-Based Access** - Different permissions for Admins and Employees
-- 🔍 **Smart Search** - Filter and search articles by category, tags, and keywords
-- 📊 **Admin Dashboard** - Comprehensive overview and approval management
-- 🎭 **Rich Animations** - Smooth transitions, hover effects, and micro-interactions
+- 📚 **Knowledge Base Management** - Create, organize, and search articles
+- 🤖 **AI-Powered Search** - Intelligent chatbot for finding solutions
+- 👥 **User Management** - Role-based access (Admin/Employee)
+- 📊 **Admin Dashboard** - Comprehensive analytics and management
+- ✅ **Approval Workflow** - Article review and approval system
+- 🏷️ **Categories & Tags** - Organized content structure
+- 📱 **Responsive Design** - Modern, mobile-friendly UI
+
+## Tech Stack
+
+**Backend:**
+- Node.js & Express
+- MongoDB with Mongoose
+- JWT Authentication
+- RESTful API
+
+**Frontend:**
+- React 18
+- React Router v6
+- Framer Motion
+- Lucide Icons
+
+## Quick Start (Development)
+
+```bash
+# Install dependencies
+cd backend && npm install
+cd ../frontend && npm install
+
+# Configure environment
+cd backend && cp .env.example .env
+cd ../frontend && cp .env.example .env
+
+# Start MongoDB
+mongod
+
+# Seed database (optional)
+cd backend && node seed.js
+
+# Start backend (Terminal 1)
+cd backend && npm run dev
+
+# Start frontend (Terminal 2)
+cd frontend && npm start
+```
+
+Access: [http://localhost:3000](http://localhost:3000)
+
+## Default Credentials
+
+**Admin:**
+- Email: admin@kambaa.in
+- Password: admin123
+
+**Employee:**
+- Email: john.doe@kambaa.in
+- Password: employee123
+
+⚠️ **Change passwords in production!**
+
+## Production Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive production deployment instructions.
+
+Quick production build:
+
+```bash
+# Build frontend
+cd frontend && npm run build
+
+# Start backend with PM2
+pm2 start ecosystem.config.js
+```
 
 ## Project Structure
 
 ```
-KKBP/
-├── frontend/          # React frontend application
-│   ├── src/
-│   │   ├── components/    # Reusable components (Card, Button, Navbar)
-│   │   ├── pages/         # Page components
-│   │   ├── context/       # React context (Auth)
-│   │   └── utils/         # Utilities (API client)
-│   └── public/
-├── backend/           # Node.js/Express API server
-│   ├── controllers/   # Route controllers
-│   ├── models/        # Database models
-│   ├── routes/        # API routes
-│   ├── middleware/    # Auth middleware
-│   └── config/        # Configuration files
-└── README.md
+Kambaa-Knowledge-Base-Portal/
+├── backend/
+│   ├── config/          # Database configuration
+│   ├── controllers/     # Request handlers
+│   ├── middleware/      # Authentication middleware
+│   ├── models/          # MongoDB schemas
+│   ├── routes/          # API routes
+│   └── server.js        # Entry point
+├── frontend/
+│   ├── public/          # Static assets
+│   └── src/
+│       ├── components/  # Reusable components
+│       ├── context/     # Auth context
+│       ├── pages/       # Page components
+│       └── utils/       # API utilities
+├── ecosystem.config.js  # PM2 configuration
+└── DEPLOYMENT.md        # Deployment guide
 ```
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- MongoDB (v6.0 or higher)
-- npm or yarn
-
-### 1. Setup Database
-
-```bash
-# Make sure MongoDB is running
-Get-Service MongoDB
-
-# Or start MongoDB
-Start-Service MongoDB
-```
-
-### 2. Backend Setup
-
-```bash
-cd backend
-npm install
-```
-
-Configure `.env` file (already created with defaults):
-
-```env
-MONGODB_URI=mongodb://127.0.0.1:27017/kkbp
-JWT_SECRET=kambaa_kb_portal_secret_key_2026
-PORT=5000
-```
-
-Seed the database:
-
-```bash
-npm run seed
-```
-
-Start backend server:
-
-```bash
-npm start
-# Or for development with auto-reload:
-npm run dev
-```
-
-Backend runs on: http://localhost:5000
-
-### 3. Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Frontend runs on: http://localhost:3000
-
-### Quick Start Scripts (Windows)
-
-- `start-backend.bat` - Start backend server
-- `start-frontend.bat` - Start frontend app
-
-## Default Test Accounts
-
-After seeding the database:
-
-**Admin Account:**
-
-- Email: `admin@kambaa.in`
-- Password: `admin123`
-- Can approve/reject articles, cannot create articles
-
-**Employee Account:**
-
-- Email: `john.doe@kambaa.in`
-- Password: `employee123`
-- Can create and submit articles
-
-## Key Business Rules
-
-1. **Email Domain**: Only `@kambaa.in` emails are allowed for registration
-2. **Article Creation**: Only EMPLOYEE role can create/submit articles
-3. **Article Approval**: Only ADMIN role can approve or reject articles
-4. **Admins Cannot Write**: Admins have approval-only access, not article creation
-5. **Article States**: DRAFT, PENDING, APPROVED, REJECTED
 
 ## API Endpoints
 
 ### Authentication
-
 - `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login
+- `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user
 
 ### Articles
-
-- `GET /api/articles` - List articles (with filters)
+- `GET /api/articles` - List articles
 - `GET /api/articles/:id` - Get article details
-- `POST /api/articles` - Create article (employee only)
-- `GET /api/articles/my-articles` - Get user's articles
-- `PATCH /api/articles/:id/approve` - Approve (admin only)
-- `PATCH /api/articles/:id/reject` - Reject (admin only)
+- `POST /api/articles` - Create article
+- `PUT /api/articles/:id` - Update article
 - `DELETE /api/articles/:id` - Delete article
-- `GET /api/articles/stats` - Get statistics (admin only)
 
-### Categories
+### Admin
+- `GET /api/admin/pending-articles` - Pending approvals
+- `PUT /api/admin/articles/:id/approve` - Approve article
+- `PUT /api/admin/articles/:id/reject` - Reject article
+- `GET /api/admin/users` - List users
+- `DELETE /api/admin/users/:id` - Delete user
+- `GET /api/admin/stats` - Dashboard statistics
 
-- `GET /api/categories` - List all categories
-- `POST /api/categories` - Create category (admin only)
+### Categories & Tags
+- `GET /api/categories` - List categories
+- `POST /api/categories` - Create category
+- `GET /api/categories/:id/tags` - Get tags by category
 
-## Technology Stack
+### Chatbot
+- `POST /api/chatbot/search` - AI search query
+- `GET /api/chatbot/stats` - Search statistics
 
-### Frontend
+## Environment Variables
 
-- React 18.2.0
-- React Router DOM 6.22.0
-- Framer Motion 11.0.0 (animations)
-- Axios 1.6.0
-- Lucide React (icons)
-- React Toastify (notifications)
+**Backend** (`backend/.env`):
 
-### Backend
-
-- Node.js / Express
-- MongoDB with Mongoose ODM
-- JWT Authentication
-- bcryptjs (password hashing)
-
-## Color Palette
-
-- Primary Dark: `#1C4D8D`
-- Primary Medium: `#4988C4`
-- Primary Light: `#BDE8F5`
-
-## Development
-
-### Frontend Development
-
-```bash
-cd frontend
-npm start
+```env
+PORT=5000
+NODE_ENV=production
+MONGODB_URI=mongodb://127.0.0.1:27017/kkbp
+JWT_SECRET=your_secure_secret_here
+JWT_EXPIRE=7d
 ```
 
-### Backend Development
+**Frontend** (`frontend/.env`):
 
-```bash
-cd backend
-npm run dev  # Uses nodemon for auto-reload
-```
-
-### Database Reset
-
-```bash
-cd backend
-npm run seed  # This will reset and reseed the database
+```env
+REACT_APP_API_URL=http://localhost:5000/api
 ```
 
 ## License
 
-ISC
+Proprietary - Kambaa Internal Use Only
 
 ## Support
 
-For issues or questions, please contact the development team.
-
----
-
-**Built with ❤️ by Kambaa Team**
+For deployment assistance, contact your system administrator.

@@ -10,6 +10,8 @@ import {
   User,
   FileText,
   TrendingUp,
+  Bot,
+  BarChart3,
 } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -29,11 +31,30 @@ const AdminDashboard = () => {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [filter, setFilter] = useState("pending");
   const [processingId, setProcessingId] = useState(null);
+  const [chatbotAnalytics, setChatbotAnalytics] = useState(null);
+  const [showChatbotAnalytics, setShowChatbotAnalytics] = useState(false);
 
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
+
+  useEffect(() => {
+    if (showChatbotAnalytics) {
+      fetchChatbotAnalytics();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showChatbotAnalytics]);
+
+  const fetchChatbotAnalytics = async () => {
+    try {
+      const response = await api.get('/chatbot/analytics');
+      setChatbotAnalytics(response.data);
+    } catch (error) {
+      console.error('Error fetching chatbot analytics:', error);
+      toast.error('Failed to load chatbot analytics');
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -185,6 +206,156 @@ const AdminDashboard = () => {
             );
           })}
         </div>
+
+        {/* Chatbot Analytics Toggle */}
+        <motion.div 
+          className="chatbot-analytics-toggle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Button
+            onClick={() => setShowChatbotAnalytics(!showChatbotAnalytics)}
+            variant={showChatbotAnalytics ? "primary" : "secondary"}
+          >
+            <Bot size={18} />
+            {showChatbotAnalytics ? 'Hide' : 'Show'} Chatbot Analytics
+          </Button>
+        </motion.div>
+
+        {/* Chatbot Analytics Section */}
+        <AnimatePresence>
+          {showChatbotAnalytics && chatbotAnalytics && (
+            <motion.div
+              className="chatbot-analytics-section"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card>
+                <div className="analytics-header">
+                  <h2><Bot size={24} /> AI Assistant Analytics</h2>
+                  <p>Insights into how users interact with the knowledge base chatbot</p>
+                </div>
+
+                <div className="analytics-grid">
+                  <div className="analytics-stat-card">
+                    <div className="stat-icon" style={{ background: '#e3f2fd' }}>
+                      <FileText size={24} color="#1976d2" />
+                    </div>
+                    <div>
+                      <div className="stat-number">{chatbotAnalytics.totalApproved}</div>
+                      <div className="stat-text">Available Articles</div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-stat-card">
+                    <div className="stat-icon" style={{ background: '#f3e5f5' }}>
+                      <Eye size={24} color="#7b1fa2" />
+                    </div>
+                    <div>
+                      <div className="stat-number">{chatbotAnalytics.totalViews}</div>
+                      <div className="stat-text">Total Views</div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-stat-card">
+                    <div className="stat-icon" style={{ background: '#e8f5e9' }}>
+                      <TrendingUp size={24} color="#2e7d32" />
+                    </div>
+                    <div>
+                      <div className="stat-number">{chatbotAnalytics.avgViews}</div>
+                      <div className="stat-text">Avg Views/Article</div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-stat-card">
+                    <div className="stat-icon" style={{ background: '#fff3e0' }}>
+                      <BarChart3 size={24} color="#ef6c00" />
+                    </div>
+                    <div>
+                      <div className="stat-number">{chatbotAnalytics.articlesByCategory.length}</div>
+                      <div className="stat-text">Active Categories</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="analytics-content">
+                  {/* Top Articles */}
+                  <div className="analytics-section">
+                    <h3>📊 Most Viewed Articles</h3>
+                    <div className="top-articles-list">
+                      {chatbotAnalytics.topArticles.slice(0, 5).map((article, idx) => (
+                        <div key={article._id} className="top-article-item">
+                          <span className="article-rank">#{idx + 1}</span>
+                          <div className="article-info">
+                            <div className="article-name">{article.title}</div>
+                            <div className="article-meta-inline">
+                              <span className="category-tag">{article.category?.name}</span>
+                              <span className="author-tag">by {article.author?.username}</span>
+                            </div>
+                          </div>
+                          <div className="article-views">
+                            <Eye size={16} />
+                            {article.views}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Articles by Category */}
+                  <div className="analytics-section">
+                    <h3>📁 Articles by Category</h3>
+                    <div className="category-stats-list">
+                      {chatbotAnalytics.articlesByCategory.map((cat) => (
+                        <div key={cat._id} className="category-stat-item">
+                          <div className="category-name">{cat._id}</div>
+                          <div className="category-metrics">
+                            <span className="metric">
+                              <FileText size={14} /> {cat.count} articles
+                            </span>
+                            <span className="metric">
+                              <Eye size={14} /> {cat.totalViews} views
+                            </span>
+                          </div>
+                          <div className="category-bar">
+                            <div 
+                              className="category-bar-fill" 
+                              style={{ 
+                                width: `${(cat.count / chatbotAnalytics.totalApproved) * 100}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recently Approved */}
+                  <div className="analytics-section">
+                    <h3>🎉 Recently Approved for Chatbot</h3>
+                    <div className="recent-articles-list">
+                      {chatbotAnalytics.recentArticles.map((article) => (
+                        <div key={article._id} className="recent-article-item">
+                          <div className="recent-article-title">{article.title}</div>
+                          <div className="recent-article-info">
+                            <span>{article.category?.name}</span>
+                            <span>•</span>
+                            <span>{new Date(article.approvedAt).toLocaleDateString()}</span>
+                            <span>•</span>
+                            <span><Eye size={12} /> {article.views} views</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Filter Tabs */}
         <motion.div

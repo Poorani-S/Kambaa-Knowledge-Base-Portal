@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import Card from "../components/Card";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 import "./Home.css";
 
 const Home = () => {
+  const { isAdmin } = useAuth();
   const [articles, setArticles] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -209,33 +211,35 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <Card glow className="cta-card">
-            <motion.div
-              className="cta-content"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="cta-title">Have knowledge to share?</h2>
-              <p className="cta-description">
-                Contribute to our growing knowledge base and help your teammates
-                learn from your experience.
-              </p>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => navigate("/submit")}
-                icon={ArrowRight}
+      {/* CTA Section - Hidden for Admins */}
+      {!isAdmin && (
+        <section className="cta-section">
+          <div className="container">
+            <Card glow className="cta-card">
+              <motion.div
+                className="cta-content"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
               >
-                Submit an Article
-              </Button>
-            </motion.div>
-          </Card>
-        </div>
-      </section>
+                <h2 className="cta-title">Have knowledge to share?</h2>
+                <p className="cta-description">
+                  Contribute to our growing knowledge base and help your teammates
+                  learn from your experience.
+                </p>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => navigate("/submit")}
+                  icon={ArrowRight}
+                >
+                  Submit an Article
+                </Button>
+              </motion.div>
+            </Card>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,0 +1,30 @@
+{
+  "name": "kambaa-knowledge-base-portal",
+  "version": "1.0.0",
+  "description": "Enterprise Knowledge Base Portal with AI-powered search",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start:prod": "pm2 start ecosystem.config.js",
+    "stop:prod": "pm2 stop kkbp-backend",
+    "restart:prod": "pm2 restart kkbp-backend",
+    "logs": "pm2 logs kkbp-backend",
+    "seed": "cd backend && node seed.js"
+  },
+  "keywords": [
+    "knowledge-base",
+    "enterprise",
+    "ai-search",
+    "mongodb",
+    "react"
+  ],
+  "author": "Kambaa",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

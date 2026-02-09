@@ -20,8 +20,9 @@ import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import SubmitArticle from "./pages/SubmitArticle";
 import MyArticles from "./pages/MyArticles";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/AdminDashboard_New";
 import Profile from "./pages/Profile";
+import Chatbot from "./pages/Chatbot";
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -53,7 +54,7 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
 };
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   return (
     <>
@@ -61,18 +62,18 @@ function AppRoutes() {
       <Routes>
         <Route
           path="/login"
-          element={!user ? <Login /> : <Navigate to="/" />}
+          element={!user ? <Login /> : isAdmin ? <Navigate to="/admin" /> : <Navigate to="/" />}
         />
         <Route
           path="/register"
-          element={!user ? <Register /> : <Navigate to="/" />}
+          element={!user ? <Register /> : isAdmin ? <Navigate to="/admin" /> : <Navigate to="/" />}
         />
 
         <Route
           path="/"
           element={
             <PrivateRoute>
-              <Home />
+              {isAdmin ? <Navigate to="/admin" replace /> : <Home />}
             </PrivateRoute>
           }
         />
@@ -113,6 +114,14 @@ function AppRoutes() {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chatbot"
+          element={
+            <PrivateRoute>
+              <Chatbot />
             </PrivateRoute>
           }
         />

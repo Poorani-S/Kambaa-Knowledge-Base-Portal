@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -9,7 +9,7 @@ import {
   User,
   LogOut,
   Shield,
-  BookOpen,
+  MessageCircle,
 } from "lucide-react";
 import "./Navbar.css";
 
@@ -18,15 +18,18 @@ const Navbar = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: "/", label: "Home", icon: Home },
+    ...(!isAdmin ? [{ path: "/", label: "Home", icon: Home }] : []),
     { path: "/articles", label: "Articles", icon: FileText },
+    { path: "/chatbot", label: "AI Assistant", icon: MessageCircle },
     ...(user && !isAdmin
       ? [{ path: "/submit", label: "Submit Article", icon: PlusCircle }]
       : []),
     ...(isAdmin
       ? [{ path: "/admin", label: "Admin Dashboard", icon: Shield }]
       : []),
-    { path: "/my-articles", label: "My Articles", icon: User },
+    ...(user && !isAdmin
+      ? [{ path: "/my-articles", label: "My Articles", icon: User }]
+      : []),
   ];
 
   return (

@@ -58,7 +58,8 @@
 }
 
 /* Sizes */
-.btn-sm {
+.btn-sm,
+.btn-small {
   padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
 }
