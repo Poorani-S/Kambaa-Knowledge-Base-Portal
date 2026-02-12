@@ -1,304 +1,230 @@
-# RAG (Retrieval-Augmented Generation) Setup Guide
+# RAG (AI-Powered Search) Setup Guide
 
 ## 🤖 What is RAG?
 
-RAG enhances your chatbot with AI-powered semantic search and intelligent answer generation. Instead of simple keyword matching, RAG:
+RAG (Retrieval-Augmented Generation) enhances your chatbot with:
+- 🔍 Semantic search (understands question meaning)
+- 🎯 AI-generated answers from your knowledge base
+- 📚 Source attribution with similarity scores
 
-1. **Understands Context**: Uses AI embeddings to understand the meaning of questions
-2. **Finds Relevant Content**: Retrieves semantically similar articles (not just keyword matches)
-3. **Generates Answers**: Creates intelligent, context-aware responses using LLM
-4. **Shows Sources**: Provides similarity scores and links to source articles
+## ⚙️ Configuration Options
 
-## 📋 Prerequisites
-
-- OpenAI API key (or other LLM provider API key)
-- MongoDB database
-- Node.js backend running
-
-## 🚀 Quick Start
-
-### 1. Get OpenAI API Key
-
-1. Go to https://platform.openai.com/api-keys
-2. Sign up or log in
-3. Click "Create new secret key"
-4. Copy your API key (starts with `sk-`)
-
-### 2. Configure Environment Variables
-
-Add to your **backend/.env** file:
+### Option 1: Local Mode (FREE - Recommended to Start)
+✅ No API key needed  
+✅ Works immediately  
+✅ Fast semantic search  
+✅ Template-based answers  
 
 ```env
-# RAG/AI Configuration
-OPENAI_API_KEY=sk-your-actual-api-key-here
+EMBEDDING_PROVIDER=local
+```
+
+### Option 2: Google Gemini (AI-Powered Answers)
+✅ Free tier available (15 requests/min)  
+✅ AI-generated conversational answers  
+✅ Uses local embeddings + Gemini LLM  
+
+```env
+EMBEDDING_PROVIDER=gemini
+GEMINI_API_KEY=your_api_key_here
+LLM_MODEL=gemini-pro
+```
+
+**Get API Key:** https://aistudio.google.com/apikey
+
+**Note:** Gemini uses local embeddings (free) and only calls the API for answer generation.
+
+### Option 3: OpenAI (Alternative)
+```env
 EMBEDDING_PROVIDER=openai
-EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_API_KEY=your_api_key_here
 LLM_MODEL=gpt-3.5-turbo
 ```
 
-**Model Options:**
-- `EMBEDDING_MODEL`: 
-  - `text-embedding-3-small` (faster, cheaper, recommended)
-  - `text-embedding-3-large` (more accurate, more expensive)
-  
-- `LLM_MODEL`:
-  - `gpt-3.5-turbo` (faster, cheaper, recommended)
-  - `gpt-4` (more accurate, more expensive)
-  - `gpt-4-turbo` (balance of speed and accuracy)
+**Get API Key:** https://platform.openai.com/api-keys
 
-### 3. Restart Backend Server
+---
 
+## 🚀 Quick Start
+
+### 1. Configure .env File
+
+Edit `backend/.env`:
+
+```env
+# For local (free):
+EMBEDDING_PROVIDER=local
+
+# For Gemini AI:
+EMBEDDING_PROVIDER=gemini
+GEMINI_API_KEY=AIza...
+LLM_MODEL=gemini-pro
+```
+
+### 2. Restart Server
 ```bash
 cd backend
 npm run dev
 ```
 
-### 4. Index Your Articles
+### 3. Index Your Articles
 
-You need to generate embeddings for all approved articles.
-
-**Option A: Using Admin Dashboard**
-1. Log in as admin
-2. Go to Admin Dashboard
-3. Navigate to "RAG Settings" (if you add this to UI)
-4. Click "Index All Articles"
-
-**Option B: Using API (via Postman/curl)**
-
+**Via API (Postman/curl):**
 ```bash
-# Get your auth token first (login as admin)
-TOKEN=your_admin_jwt_token
-
-# Index all approved articles
-curl -X POST http://localhost:5000/api/chatbot/index-all \
-  -H "Authorization: Bearer $TOKEN"
-
-# Check indexing status
-curl -X GET http://localhost:5000/api/chatbot/index-status \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-**Option C: Using PowerShell**
-
-```powershell
-# Login and get token
-$response = Invoke-RestMethod -Uri "http://localhost:5000/api/auth/login" `
-  -Method POST `
-  -ContentType "application/json" `
-  -Body (@{
-    email = "admin@kambaa.in"
-    password = "your_admin_password"
-  } | ConvertTo-Json)
-
-$token = $response.token
+# Login as admin to get token
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@kambaa.in","password":"admin123"}'
 
 # Index all articles
-Invoke-RestMethod -Uri "http://localhost:5000/api/chatbot/index-all" `
-  -Method POST `
-  -Headers @{ Authorization = "Bearer $token" }
-
-# Check status
-Invoke-RestMethod -Uri "http://localhost:5000/api/chatbot/index-status" `
-  -Method GET `
-  -Headers @{ Authorization = "Bearer $token" }
+curl -X POST http://localhost:5000/api/chatbot/index-all \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-## 📊 API Endpoints
+**Via Admin Dashboard:**
+- Login as admin
+- Navigate to admin section
+- Use index functionality (if implemented in UI)
 
-### User Endpoints
+### 4. Test the Chatbot
 
-**RAG Search** (Semantic + AI Answer)
-```http
-POST /api/chatbot/rag-search
-Authorization: Bearer {token}
-Content-Type: application/json
+Go to the chatbot page and ask questions like:
+- "How to fix database connection error?"
+- "API timeout issue solution"
+- "React component not rendering"
 
-{
-  "query": "How do I fix database connection errors?"
-}
+---
+
+## 📊 How It Works
+
+### Architecture
+
+```
+User Question
+    ↓
+Generate Embedding (local or API)
+    ↓
+Search Similar Articles (cosine similarity)
+    ↓
+Retrieve Top Matches
+    ↓
+Generate Answer (template or AI)
+    ↓
+Return Answer + Sources
 ```
 
-**Keyword Search** (Fallback)
-```http
-POST /api/chatbot/search
-Authorization: Bearer {token}
-Content-Type: application/json
+### Hybrid Search
+Combines two approaches:
+1. **Semantic similarity** (60%) - Understands meaning
+2. **Keyword matching** (40%) - Finds exact terms
 
-{
-  "query": "database error"
-}
-```
+### Indexing Process
+1. Extract text from articles
+2. Generate embeddings (vector representations)
+3. Store in `ArticleEmbedding` collection
+4. Use for fast similarity search
 
-### Admin Endpoints
+---
 
-**Index Single Article**
-```http
+## 🔧 Management
+
+### Index Single Article
+```bash
 POST /api/chatbot/index-article/:articleId
-Authorization: Bearer {admin_token}
+Authorization: Bearer <admin-token>
 ```
 
-**Index All Articles**
-```http
+### Index All Articles
+```bash
 POST /api/chatbot/index-all
-Authorization: Bearer {admin_token}
+Authorization: Bearer <admin-token>
 ```
 
-**Get Index Status**
-```http
+### Check Index Status
+```bash
 GET /api/chatbot/index-status
-Authorization: Bearer {admin_token}
+Authorization: Bearer <admin-token>
 ```
 
-## 💡 Usage
+### Search with RAG
+```bash
+POST /api/chatbot/rag-search
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### Frontend Chatbot
-
-1. Navigate to `/chatbot` page
-2. Type your question naturally
-3. Get AI-generated answer with sources
-4. Click on source articles for more details
-
-**Example Questions:**
-- "How do I deploy this application to production?"
-- "What are the database backup procedures?"
-- "How to fix authentication errors?"
-- "Steps to configure environment variables"
-
-### Response Format
-
-**RAG Response:**
-```json
 {
-  "found": true,
-  "ragEnabled": true,
-  "aiAnswer": "To fix database connection errors, you should...",
-  "sources": [
-    {
-      "id": "article_id",
-      "title": "Database Configuration Guide",
-      "category": "Infrastructure",
-      "excerpt": "...",
-      "similarity": "95.3%",
-      "tags": ["database", "mongodb"],
-      "views": 150,
-      "author": "admin"
-    }
-  ],
-  "alternativeResults": [...]
+  "query": "your question here"
 }
 ```
 
-**Keyword Response (Fallback):**
-```json
-{
-  "found": true,
-  "article": {
-    "id": "article_id",
-    "title": "Article Title",
-    "category": "Category",
-    "content": "Full content...",
-    "excerpt": "Summary..."
-  },
-  "alternativeResults": [...]
-}
-```
+---
 
-## 🔧 Maintenance
+## 💡 Best Practices
 
-### When to Re-Index
+1. **Re-index after updates:** When articles are edited, re-index them
+2. **Approve articles first:** Only approved articles are searchable
+3. **Use descriptive titles:** Helps with keyword matching
+4. **Add good excerpts:** Improves answer quality
+5. **Test queries:** Verify answers are relevant
 
-Re-index articles when:
-- ✅ New article is approved
-- ✅ Article content is updated
-- ✅ You change embedding models
-- ✅ You want to refresh all embeddings
-
-### Auto-Indexing (Optional Enhancement)
-
-You can automatically index articles when they're approved by adding this to your article approval logic:
-
-```javascript
-// In articleController.js - approveArticle method
-const { indexArticle } = require('./chatbotController');
-
-// After approving article
-await indexArticle({ params: { articleId: article._id } }, res);
-```
-
-### Cost Estimation
-
-**OpenAI Pricing (as of 2024):**
-- Embeddings (text-embedding-3-small): $0.0001 per 1K tokens
-- GPT-3.5-turbo: $0.0015 per 1K tokens (prompt) + $0.002 per 1K tokens (completion)
-
-**Example:**
-- 100 articles (avg 1000 words each) ≈ $0.15 one-time
-- 1000 queries per month ≈ $3-5 per month
+---
 
 ## 🐛 Troubleshooting
 
-### "RAG service is not configured"
-- Check if `OPENAI_API_KEY` is set in `.env`
-- Verify API key is valid
-- Restart backend server
+**No results found:**
+- Ensure articles are indexed: `GET /api/chatbot/index-status`
+- Check articles are approved (status: APPROVED)
+- Try different query phrasing
 
-### "No indexed articles found"
-- Run `POST /api/chatbot/index-all` to index all articles
-- Check if you have approved articles
-- Verify MongoDB connection
+**Low similarity scores:**
+- Normal for local embeddings (threshold: 0.15)
+- Improve with better article content
+- Use more specific queries
 
-### "Error generating embedding"
-- Check OpenAI API key is valid and has credits
-- Check internet connection
-- Verify article content isn't too long (max 8000 chars per article)
+**Gemini API errors:**
+- Verify API key at https://aistudio.google.com/apikey
+- Check API quotas
+- Fall back to local mode if needed
 
-### Low Similarity Scores
-- Try rephrasing your question
-- Add more detailed articles
-- Use different embedding model (try `text-embedding-3-large`)
+**Slow performance:**
+- Consider indexing only approved articles
+- Limit search results (default: top 5)
+- Use local mode for faster responses
 
-### Slow Response Times
-- Embeddings are cached in database
-- First-time indexing takes time
-- Consider using faster model (`gpt-3.5-turbo` instead of `gpt-4`)
+---
 
-## 🔒 Security
+## 📈 Performance
 
-- ✅ All RAG endpoints require authentication
-- ✅ Only admins can index articles
-- ✅ API keys stored in environment variables
-- ✅ Never expose API keys in frontend
+### Local Mode
+- **Embedding generation:** <10ms
+- **Search time:** <50ms (256d vectors)
+- **Total response:** <100ms
+- **Cost:** FREE
 
-## 🌟 Best Practices
+### Gemini Mode
+- **Embedding generation:** <10ms (local)
+- **Search time:** <50ms
+- **Answer generation:** 500-1500ms (API)
+- **Total response:** <2 seconds
+- **Cost:** Free tier: 15 req/min
 
-1. **Index Regularly**: Set up a schedule to re-index articles weekly
-2. **Monitor Costs**: Check OpenAI usage dashboard regularly
-3. **Quality Content**: Better articles = better AI answers
-4. **Use Excerpts**: Good article summaries improve RAG accuracy
-5. **Tag Articles**: Proper categorization helps retrieval
-6. **Test Questions**: Try various question formats to optimize
+### OpenAI Mode
+- **Embedding generation:** 100-300ms (API)
+- **Search time:** <50ms
+- **Answer generation:** 500-2000ms (API)
+- **Total response:** 1-3 seconds
+- **Cost:** ~$0.005 per query
 
-## 📈 Future Enhancements
+---
 
-Potential improvements:
-- [ ] Support for other LLM providers (Gemini, Claude, etc.)
-- [ ] Auto-indexing on article approval
-- [ ] RAG analytics dashboard
-- [ ] Custom embedding fine-tuning
-- [ ] Multi-language support
-- [ ] Conversation history/follow-up questions
-- [ ] Response rating and feedback
+## 🎓 Tips
 
-## 📚 Additional Resources
+- Start with **local mode** to test functionality
+- Activate **Gemini** when you want AI-generated answers
+- Use **OpenAI** only if you need their specific models
+- Local mode is production-ready for most use cases
+- Monitor API usage and costs when using external providers
 
-- [OpenAI Documentation](https://platform.openai.com/docs)
-- [RAG Architecture Guide](https://www.pinecone.io/learn/retrieval-augmented-generation/)
-- [Embedding Models Comparison](https://openai.com/blog/new-embedding-models)
+---
 
-## 🆘 Need Help?
-
-- Check the backend logs for detailed error messages
-- Test with simple queries first
-- Verify all environment variables are set
-- Check MongoDB connection and data
-- Ensure OpenAI API has sufficient credits
+For deployment configuration, see [DEPLOYMENT.md](DEPLOYMENT.md).

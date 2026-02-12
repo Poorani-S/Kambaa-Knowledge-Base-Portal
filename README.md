@@ -5,12 +5,13 @@ Enterprise-grade internal knowledge management system with AI-powered search and
 ## Features
 
 - 📚 **Knowledge Base Management** - Create, organize, and search articles
-- 🤖 **AI-Powered Search** - Intelligent chatbot for finding solutions
+- 🤖 **AI-Powered RAG Search** - Semantic search with AI-generated answers (Gemini/OpenAI/Local)
 - 👥 **User Management** - Role-based access (Admin/Employee)
 - 📊 **Admin Dashboard** - Comprehensive analytics and management
 - ✅ **Approval Workflow** - Article review and approval system
 - 🏷️ **Categories & Tags** - Organized content structure
 - 📱 **Responsive Design** - Modern, mobile-friendly UI
+- 📄 **PDF Support** - Upload and attach PDF documents to articles
 
 ## Tech Stack
 
@@ -18,6 +19,8 @@ Enterprise-grade internal knowledge management system with AI-powered search and
 - Node.js & Express
 - MongoDB with Mongoose
 - JWT Authentication
+- Google Gemini AI / OpenAI (optional)
+- Local embeddings (TF-IDF)
 - RESTful API
 
 **Frontend:**
@@ -127,9 +130,13 @@ Kambaa-Knowledge-Base-Portal/
 - `POST /api/categories` - Create category
 - `GET /api/categories/:id/tags` - Get tags by category
 
-### Chatbot
-- `POST /api/chatbot/search` - AI search query
+### Chatbot / RAG Search
+- `POST /api/chatbot/rag-search` - AI-powered semantic search
+- `POST /api/chatbot/search` - Keyword-based search (fallback)
 - `GET /api/chatbot/stats` - Search statistics
+- `POST /api/chatbot/index-all` - Index all articles (admin)
+- `POST /api/chatbot/index-article/:id` - Index single article (admin)
+- `GET /api/chatbot/index-status` - Check indexing status (admin)
 
 ## Environment Variables
 
@@ -139,13 +146,20 @@ Kambaa-Knowledge-Base-Portal/
 PORT=5000
 NODE_ENV=production
 MONGODB_URI=mongodb://127.0.0.1:27017/kkbp
-JWT_SECRET=your_secure_secret_here
-JWT_EXPIRE=7d
+
+# RAG/AI Search (Optional)
+EMBEDDING_PROVIDER=local  # or 'gemini' or 'openai'
+GEMINI_API_KEY=your_gemini_key  # if using Gemini
+LLM_MODEL=gemini-pro  # if using Gemini
 ```
 
 **Frontend** (`frontend/.env`):
 
 ```env
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+For RAG setup details, see [RAG_SETUP.md](RAG_SETUP.md).env
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 
