@@ -146,7 +146,7 @@ exports.searchKnowledgeBase = async (req, res) => {
       .split(/\s+/)
       .filter(word => word.length > 2 && !commonWords.includes(word));
 
-    // Build search conditions with keyword matching
+    // Build search conditions with keyword matching (including PDF content)
     const searchConditions = {
       status: 'APPROVED',
       $or: [
@@ -154,11 +154,13 @@ exports.searchKnowledgeBase = async (req, res) => {
         { title: { $regex: searchTerm, $options: 'i' } },
         { content: { $regex: searchTerm, $options: 'i' } },
         { excerpt: { $regex: searchTerm, $options: 'i' } },
+        { pdfText: { $regex: searchTerm, $options: 'i' } },
         // Individual keyword searches
         ...keywords.flatMap(keyword => [
           { title: { $regex: keyword, $options: 'i' } },
           { content: { $regex: keyword, $options: 'i' } },
-          { excerpt: { $regex: keyword, $options: 'i' } }
+          { excerpt: { $regex: keyword, $options: 'i' } },
+          { pdfText: { $regex: keyword, $options: 'i' } }
         ])
       ]
     };
@@ -178,31 +180,34 @@ exports.searchKnowledgeBase = async (req, res) => {
       });
     }
 
-    // Score articles based on relevance
+    // Score articles based on relevance (including PDF content)
     const scoredArticles = articles.map(article => {
       let score = 0;
       const titleLower = article.title.toLowerCase();
       const excerptLower = (article.excerpt || '').toLowerCase();
       const contentLower = article.content.toLowerCase();
+      const pdfTextLower = (article.pdfText || '').toLowerCase();
       const queryLower = searchTerm.toLowerCase();
 
       // Exact phrase match gets highest score
       if (titleLower.includes(queryLower)) score += 100;
       if (excerptLower.includes(queryLower)) score += 80;
       if (contentLower.includes(queryLower)) score += 50;
+      if (pdfTextLower.includes(queryLower)) score += 60; // PDF content is important
 
       // Individual keyword matches
       keywords.forEach(keyword => {
         if (titleLower.includes(keyword)) score += 10;
         if (excerptLower.includes(keyword)) score += 5;
         if (contentLower.includes(keyword)) score += 2;
+        if (pdfTextLower.includes(keyword)) score += 4; // PDF keyword match
         if (article.tags && article.tags.some(tag => tag.name.toLowerCase().includes(keyword))) score += 8;
         if (article.category && article.category.name.toLowerCase().includes(keyword)) score += 5;
       });
 
       // Bonus for multiple keyword matches
       const matchedKeywords = keywords.filter(keyword => 
-        titleLower.includes(keyword) || excerptLower.includes(keyword) || contentLower.includes(keyword)
+        titleLower.includes(keyword) || excerptLower.includes(keyword) || contentLower.includes(keyword) || pdfTextLower.includes(keyword)
       );
       score += matchedKeywords.length * 5;
 
