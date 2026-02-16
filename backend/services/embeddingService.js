@@ -90,12 +90,10 @@ class EmbeddingService {
     // First expand abbreviations for better matching
     const expandedText = this.expandAbbreviations(text);
     
-    // Common stopwords to filter out
-    const stopwords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
-      'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 
-      'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must',
-      'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what',
-      'which', 'who', 'when', 'where', 'why', 'how', 'can', 'all', 'each', 'every', 'some', 'any']);
+    // Minimal stopwords - only remove the most common words that add no meaning
+    const stopwords = new Set(['the', 'a', 'an', 'and', 'or', 'in', 'on', 'at', 'to', 
+      'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be',
+      'this', 'that', 'it']);
     
     // Normalize and tokenize text
     const normalized = expandedText
@@ -103,9 +101,9 @@ class EmbeddingService {
       .replace(/\s+/g, ' ')
       .trim();
     
-    // Extract words and filter stopwords
+    // Extract words and filter only minimal stopwords
     const words = normalized.split(' ')
-      .filter(w => w.length > 2 && !stopwords.has(w));
+      .filter(w => w.length > 1 && !stopwords.has(w)); // Changed from length > 2 to > 1
     
     // Create bigrams (2-word combinations) for better context
     const bigrams = [];
@@ -113,8 +111,14 @@ class EmbeddingService {
       bigrams.push(words[i] + '_' + words[i + 1]);
     }
     
-    // Combine unigrams and bigrams
-    const features = [...words, ...bigrams];
+    // Create trigrams for even better phrase matching
+    const trigrams = [];
+    for (let i = 0; i < words.length - 2; i++) {
+      trigrams.push(words[i] + '_' + words[i + 1] + '_' + words[i + 2]);
+    }
+    
+    // Combine unigrams, bigrams, and trigrams
+    const features = [...words, ...bigrams, ...trigrams];
     
     // Count word frequencies
     const wordFreq = {};
@@ -130,17 +134,21 @@ class EmbeddingService {
       const hash1 = this.hashString(word);
       const hash2 = this.hashString(word + '_alt');
       const hash3 = this.hashString(word + '_alt2');
+      const hash4 = this.hashString(word + '_alt3');
       
       const idx1 = Math.abs(hash1) % this.vectorSize;
       const idx2 = Math.abs(hash2) % this.vectorSize;
       const idx3 = Math.abs(hash3) % this.vectorSize;
+      const idx4 = Math.abs(hash4) % this.vectorSize;
       
       // Weight by term frequency with smoothing
       const weight = Math.log(1 + freq);
       
+      // Distribute across more hash positions for better coverage
       vector[idx1] += weight;
-      vector[idx2] += weight * 0.5;
-      vector[idx3] += weight * 0.25;
+      vector[idx2] += weight * 0.7;
+      vector[idx3] += weight * 0.5;
+      vector[idx4] += weight * 0.3;
     });
     
     // Normalize the vector (L2 normalization)
@@ -220,6 +228,10 @@ class EmbeddingService {
   findSimilarDocumentsHybrid(query, queryEmbedding, documents, topK = 5) {
     // Extract keywords from query
     const queryKeywords = this.extractKeywords(query);
+    const queryLower = query.toLowerCase();
+    
+    // Also extract exact phrases (2-3 words)
+    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2);
     
     const results = documents.map(doc => {
       // Calculate semantic similarity
@@ -228,37 +240,62 @@ class EmbeddingService {
       // Calculate keyword overlap with title (most important)
       const titleText = doc.article.title.toLowerCase();
       const contentText = (doc.article.content + ' ' + (doc.article.excerpt || '')).toLowerCase();
+      const fullText = titleText + ' ' + contentText;
       
       let keywordScore = 0;
       let titleMatches = 0;
       let contentMatches = 0;
+      let exactMatchBonus = 0;
       
-      queryKeywords.forEach(keyword => {
-        if (titleText.includes(keyword)) {
-          titleMatches++;
-          keywordScore += 0.5; // High weight for title matches
+      // Check for exact phrase match (huge boost)
+      if (fullText.includes(queryLower)) {
+        exactMatchBonus = 2.0; // Major boost for exact match
+        if (titleText.includes(queryLower)) {
+          exactMatchBonus = 3.0; // Even higher for title exact match
         }
-        if (contentText.includes(keyword)) {
+      }
+      
+      // Check individual keywords
+      queryKeywords.forEach(keyword => {
+        const keywordRegex = new RegExp(`\\b${keyword}\\b`, 'i');
+        
+        if (keywordRegex.test(titleText)) {
+          titleMatches++;
+          keywordScore += 1.0; // High weight for title matches
+        } else if (keywordRegex.test(contentText)) {
           contentMatches++;
-          keywordScore += 0.1; // Lower weight for content matches
+          keywordScore += 0.3; // Lower weight for content matches
         }
       });
+      
+      // Check for multi-word phrase matches
+      for (let i = 0; i < queryWords.length - 1; i++) {
+        const phrase = queryWords[i] + ' ' + queryWords[i + 1];
+        if (fullText.includes(phrase)) {
+          keywordScore += 0.5; // Bonus for phrase matches
+        }
+      }
       
       // Normalize keyword score
       if (queryKeywords.length > 0) {
         keywordScore = keywordScore / queryKeywords.length;
       }
       
-      // Hybrid score: 60% semantic + 40% keyword matching
-      const hybridScore = (semanticScore * 0.6) + (keywordScore * 0.4);
+      // Add exact match bonus
+      keywordScore = Math.min(keywordScore + exactMatchBonus, 5.0); // Cap at 5.0
+      
+      // Hybrid score: For local/gemini, prioritize keyword matching more
+      // 40% semantic + 60% keyword matching (reversed from before)
+      const hybridScore = (semanticScore * 0.4) + (Math.min(keywordScore, 1.0) * 0.6);
       
       return {
         ...doc,
         similarity: hybridScore,
         semanticScore,
-        keywordScore,
+        keywordScore: Math.min(keywordScore, 1.0),
         titleMatches,
-        contentMatches
+        contentMatches,
+        exactMatch: exactMatchBonus > 0
       };
     });
 
@@ -375,17 +412,15 @@ class EmbeddingService {
     // First expand abbreviations
     const expandedText = this.expandAbbreviations(text);
     
-    const stopwords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
-      'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 
-      'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must',
-      'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what',
-      'which', 'who', 'when', 'where', 'why', 'how', 'can', 'all', 'each', 'every', 'some', 'any',
-      'get', 'fix', 'issue', 'error', 'problem']);
+    // Minimal stopwords - only filter truly meaningless words
+    const stopwords = new Set(['the', 'a', 'an', 'and', 'or', 'in', 'on', 'at', 
+      'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be',
+      'this', 'that', 'it']);
     
     const words = expandedText
       .replace(/[^\w\s]/g, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 2 && !stopwords.has(w));
+      .filter(w => w.length > 1 && !stopwords.has(w)); // Changed from length > 2 to > 1
     
     return [...new Set(words)]; // Return unique keywords
   }

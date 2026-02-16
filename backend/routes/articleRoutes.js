@@ -14,7 +14,6 @@ const {
 const { protect, adminOnly } = require("../middleware/auth");
 const upload = require("../middleware/upload");
 
-// Public routes (require authentication)
 router.get("/", protect, getArticles);
 router.get("/stats", protect, adminOnly, getArticleStats);
 router.get("/my-articles", protect, getMyArticles);
@@ -49,8 +48,6 @@ router.get("/pdf/:filename", async (req, res) => {
     res.status(500).json({ message: 'Error serving PDF' });
   }
 });
-
-// Admin only routes
 router.patch("/:id/approve", protect, adminOnly, approveArticle);
 router.patch("/:id/reject", protect, adminOnly, rejectArticle);
 

@@ -62,16 +62,23 @@ exports.searchWithRAG = async (req, res) => {
 
     // Adjust similarity threshold based on embedding provider
     const embeddingProvider = process.env.EMBEDDING_PROVIDER || 'local';
-    // Lower threshold for local/gemini embeddings since they use hybrid scoring
-    const minSimilarity = (embeddingProvider === 'local' || embeddingProvider === 'gemini') ? 0.05 : 0.5;
+    // Very low threshold for local/gemini embeddings to catch any relevant matches
+    const minSimilarity = (embeddingProvider === 'local' || embeddingProvider === 'gemini') ? 0.001 : 0.5;
 
     console.log(`🔍 Search: "${query}"`);
+    console.log(`📊 Provider: ${embeddingProvider}`);
     console.log(`📊 Top results:`, similarDocs.slice(0, 3).map(d => ({
       title: d.article.title.substring(0, 50),
-      similarity: (d.similarity * 100).toFixed(1) + '%'
+      similarity: (d.similarity * 100).toFixed(1) + '%',
+      semanticScore: (d.semanticScore * 100).toFixed(1) + '%',
+      keywordScore: (d.keywordScore * 100).toFixed(1) + '%',
+      titleMatches: d.titleMatches,
+      contentMatches: d.contentMatches,
+      exactMatch: d.exactMatch || false
     })));
 
     if (similarDocs.length === 0 || similarDocs[0].similarity < minSimilarity) {
+      console.log(`❌ No results above threshold ${minSimilarity}`);
       return res.json({
         found: false,
         message: '❌ No relevant articles found for your query. Try rephrasing or submit this solution to KKBP once resolved.'
