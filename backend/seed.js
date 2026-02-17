@@ -31,6 +31,24 @@ const seedDatabase = async () => {
         password: "employee123",
         role: "EMPLOYEE",
       },
+      {
+        username: "sarah_wilson",
+        email: "sarah.wilson@kambaa.in",
+        password: "employee123",
+        role: "EMPLOYEE",
+      },
+      {
+        username: "mike_johnson",
+        email: "mike.johnson@kambaa.in",
+        password: "employee123",
+        role: "EMPLOYEE",
+      },
+      {
+        username: "emily_brown",
+        email: "emily.brown@kambaa.in",
+        password: "employee123",
+        role: "EMPLOYEE",
+      },
     ]);
     console.log("✅ Employee users created");
 
@@ -46,10 +64,16 @@ const seedDatabase = async () => {
 
     // Get created data
     const admin = await User.findOne({ email: "admin@kambaa.in" });
-    const employee = await User.findOne({ email: "john.doe@kambaa.in" });
+    const johnDoe = await User.findOne({ email: "john.doe@kambaa.in" });
+    const janeSmith = await User.findOne({ email: "jane.smith@kambaa.in" });
+    const sarahWilson = await User.findOne({ email: "sarah.wilson@kambaa.in" });
+    const mikeJohnson = await User.findOne({ email: "mike.johnson@kambaa.in" });
+    const emilyBrown = await User.findOne({ email: "emily.brown@kambaa.in" });
     const techCategory = await Category.findOne({ name: "Technology" });
     const devCategory = await Category.findOne({ name: "Development" });
     const tutorialCategory = await Category.findOne({ name: "Tutorials" });
+    const designCategory = await Category.findOne({ name: "Design" });
+    const bestPracticesCategory = await Category.findOne({ name: "Best Practices" });
 
     // Create Tags
     const tags = await Tag.create([
@@ -68,6 +92,7 @@ const seedDatabase = async () => {
 
     // Create sample approved articles
     const articles = await Article.create([
+      // APPROVED ARTICLES
       {
         title: "How to Fix API Timeout Issues in Node.js",
         content: `# Solution
@@ -97,7 +122,7 @@ Make sure all promises are properly awaited to avoid blocking.
 **Result:** API response times reduced from 30s to 2s.`,
         excerpt: "Learn how to diagnose and fix API timeout issues in Node.js applications by optimizing queries and configuring proper timeout handlers.",
         status: "APPROVED",
-        author: employee._id,
+        author: johnDoe._id,
         category: techCategory._id,
         tags: [tags[0]._id, tags[5]._id, tags[3]._id],
         approvedBy: admin._id,
@@ -145,79 +170,12 @@ mongosh
 If successful, you should see the MongoDB shell prompt.`,
         excerpt: "Step-by-step guide to resolve MongoDB connection refused errors on Windows, Linux, and Mac systems.",
         status: "APPROVED",
-        author: employee._id,
+        author: janeSmith._id,
         category: devCategory._id,
         tags: [tags[1]._id, tags[2]._id, tags[4]._id, tags[3]._id],
         approvedBy: admin._id,
         approvedAt: new Date(),
         views: 78,
-      },
-      {
-        title: "Nginx 502 Bad Gateway - Troubleshooting Guide",
-        content: `# Fixing Nginx 502 Bad Gateway Error
-
-A 502 error means Nginx cannot connect to your backend application.
-
-## Solution Steps:
-
-### 1. Check if Backend is Running
-\`\`\`bash
-# Check if Node.js app is running
-pm2 list
-
-# Or check port
-netstat -tulpn | grep :3000
-\`\`\`
-
-### 2. Verify Nginx Configuration
-\`\`\`nginx
-upstream backend {
-    server 127.0.0.1:3000;
-}
-
-server {
-    location / {
-        proxy_pass http://backend;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-\`\`\`
-
-### 3. Check Nginx Error Logs
-\`\`\`bash
-tail -f /var/log/nginx/error.log
-\`\`\`
-
-### 4. Increase Timeout Values
-\`\`\`nginx
-proxy_connect_timeout 600;
-proxy_send_timeout 600;
-proxy_read_timeout 600;
-\`\`\`
-
-### 5. Restart Services
-\`\`\`bash
-sudo systemctl restart nginx
-pm2 restart app
-\`\`\`
-
-**Common Causes:**
-- Backend application crashed
-- Wrong port in proxy_pass
-- SELinux blocking connections
-- Backend taking too long to respond`,
-        excerpt: "Complete guide to diagnose and fix Nginx 502 Bad Gateway errors with backend applications.",
-        status: "APPROVED",
-        author: employee._id,
-        category: tutorialCategory._id,
-        tags: [tags[2]._id, tags[3]._id, tags[9]._id],
-        approvedBy: admin._id,
-        approvedAt: new Date(),
-        views: 92,
       },
       {
         title: "React Component Not Rendering - Debug Guide",
@@ -286,85 +244,426 @@ Always provide unique keys:
 4. Inspect element to see if HTML exists`,
         excerpt: "Debug guide for React components that won't render, covering common issues and solutions.",
         status: "APPROVED",
-        author: employee._id,
+        author: sarahWilson._id,
         category: devCategory._id,
         tags: [tags[6]._id, tags[2]._id, tags[3]._id],
         approvedBy: admin._id,
         approvedAt: new Date(),
         views: 63,
       },
+
+      // PENDING ARTICLES (Waiting for Admin Approval)
       {
-        title: "MongoDB Authentication Failed - Security Fix",
-        content: `# MongoDB Authentication Failed
+        title: "Understanding JWT Authentication in Express",
+        content: `# JWT Authentication Implementation Guide
 
-How to properly configure MongoDB authentication and resolve auth errors.
+Learn how to implement secure JWT-based authentication in your Express application.
 
-## Solution:
+## What is JWT?
 
-### 1. Create Admin User
+JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties.
+
+## Implementation Steps:
+
+### 1. Install Dependencies
+\`\`\`bash
+npm install jsonwebtoken bcryptjs
+\`\`\`
+
+### 2. Create Auth Middleware
 \`\`\`javascript
-use admin
-db.createUser({
-  user: "admin",
-  pwd: "securePassword123",
-  roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
-})
+const jwt = require('jsonwebtoken');
+
+const authMiddleware = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
 \`\`\`
 
-### 2. Enable Authentication
-Edit \`/etc/mongod.conf\`:
-\`\`\`yaml
-security:
-  authorization: "enabled"
-\`\`\`
-
-### 3. Create Database User
+### 3. Generate Tokens
 \`\`\`javascript
-use myDatabase
-db.createUser({
-  user: "appUser",
-  pwd: "appPassword123",
-  roles: [ { role: "readWrite", db: "myDatabase" } ]
-})
+const generateToken = (userId) => {
+  return jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+};
 \`\`\`
 
-### 4. Update Connection String
-\`\`\`
-mongodb://appUser:appPassword123@localhost:27017/myDatabase?authSource=myDatabase
-\`\`\`
-
-### 5. Common Errors:
-
-**Error: Authentication failed**
-- Wrong username or password
-- User doesn't exist in the specified database
-- Wrong authSource in connection string
-
-**Error: not authorized**
-- User doesn't have required permissions
-- Need to grant additional roles
-
-### 6. Grant Roles
+### 4. Login Route
 \`\`\`javascript
-db.grantRolesToUser("appUser", [
-  { role: "readWrite", db: "myDatabase" }
-])
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  const user = await User.findOne({ email });
+  if (!user || !(await user.matchPassword(password))) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+  
+  const token = generateToken(user._id);
+  res.json({ token, user });
+});
 \`\`\`
 
-**Security Best Practices:**
-- Use strong passwords
-- Create separate users for each application
-- Grant minimum required permissions
-- Regularly rotate credentials
-- Use SSL/TLS for connections`,
-        excerpt: "Complete guide to setting up MongoDB authentication and fixing authentication errors.",
-        status: "APPROVED",
-        author: employee._id,
+## Security Best Practices:
+- Use strong secret keys
+- Set appropriate expiration times
+- Store tokens securely on client side
+- Implement refresh token mechanism
+- Never store sensitive data in JWT payload`,
+        excerpt: "Complete guide to implementing JWT authentication in Express.js applications with security best practices.",
+        status: "PENDING",
+        author: mikeJohnson._id,
         category: techCategory._id,
-        tags: [tags[4]._id, tags[8]._id, tags[3]._id],
-        approvedBy: admin._id,
-        approvedAt: new Date(),
-        views: 55,
+        tags: [tags[8]._id, tags[5]._id],
+        views: 0,
+      },
+      {
+        title: "CSS Flexbox Layout Best Practices",
+        content: `# Mastering CSS Flexbox
+
+Flexbox is a powerful layout tool that makes designing responsive layouts easier.
+
+## Basic Flexbox Syntax
+
+\`\`\`css
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+\`\`\`
+
+## Common Use Cases:
+
+### 1. Centering Content
+\`\`\`css
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+\`\`\`
+
+### 2. Navigation Bar
+\`\`\`css
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+\`\`\`
+
+### 3. Card Layout
+\`\`\`css
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1 1 300px;
+}
+\`\`\`
+
+### 4. Responsive Columns
+\`\`\`css
+.columns {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .columns {
+    flex-direction: row;
+  }
+}
+\`\`\`
+
+## Tips:
+- Use gap property for spacing
+- flex-grow, flex-shrink, flex-basis for responsive layouts
+- align-items for vertical alignment
+- justify-content for horizontal alignment`,
+        excerpt: "Learn CSS Flexbox best practices for creating responsive and flexible layouts.",
+        status: "PENDING",
+        author: emilyBrown._id,
+        category: designCategory._id,
+        tags: [],
+        views: 0,
+      },
+      {
+        title: "Docker Compose for Development Environments",
+        content: `# Docker Compose Development Setup
+
+Streamline your development workflow with Docker Compose.
+
+## What is Docker Compose?
+
+Docker Compose is a tool for defining and running multi-container Docker applications.
+
+## Example docker-compose.yml:
+
+\`\`\`yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/mydb
+    depends_on:
+      - mongo
+  
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+\`\`\`
+
+## Commands:
+
+\`\`\`bash
+# Start all services
+docker-compose up
+
+# Start in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild containers
+docker-compose up --build
+\`\`\`
+
+## Benefits:
+- Consistent development environments
+- Easy service orchestration
+- Isolated dependencies
+- Quick setup for new team members`,
+        excerpt: "Set up efficient development environments using Docker Compose with this practical guide.",
+        status: "PENDING",
+        author: johnDoe._id,
+        category: devCategory._id,
+        tags: [tags[5]._id],
+        views: 0,
+      },
+      {
+        title: "Git Branching Strategies for Teams",
+        content: `# Git Branching Best Practices
+
+Effective branching strategies for team collaboration.
+
+## Git Flow Model:
+
+### Main Branches:
+- **main** - Production-ready code
+- **develop** - Integration branch for features
+
+### Supporting Branches:
+- **feature/** - New features
+- **hotfix/** - Emergency production fixes
+- **release/** - Release preparation
+
+## Workflow:
+
+### Creating a Feature Branch:
+\`\`\`bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/user-authentication
+\`\`\`
+
+### Completing a Feature:
+\`\`\`bash
+git checkout develop
+git merge --no-ff feature/user-authentication
+git branch -d feature/user-authentication
+git push origin develop
+\`\`\`
+
+### Hotfix Process:
+\`\`\`bash
+git checkout main
+git checkout -b hotfix/critical-bug
+# Make fixes
+git checkout main
+git merge --no-ff hotfix/critical-bug
+git checkout develop
+git merge --no-ff hotfix/critical-bug
+git branch -d hotfix/critical-bug
+\`\`\`
+
+## Branch Naming Conventions:
+- feature/short-description
+- bugfix/issue-number
+- hotfix/critical-issue
+- release/version-number
+
+## Best Practices:
+- Keep branches short-lived
+- Regular commits with clear messages
+- Pull latest changes before creating branches
+- Delete merged branches
+- Use pull requests for code review`,
+        excerpt: "Learn effective Git branching strategies for better team collaboration and code management.",
+        status: "PENDING",
+        author: janeSmith._id,
+        category: bestPracticesCategory._id,
+        tags: [],
+        views: 0,
+      },
+      {
+        title: "Python Virtual Environments Setup",
+        content: `# Python Virtual Environments Guide
+
+How to set up and manage Python virtual environments for project isolation.
+
+## Why Virtual Environments?
+
+Virtual environments allow you to manage dependencies per project without conflicts.
+
+## Using venv:
+
+### Create Virtual Environment:
+\`\`\`bash
+# Python 3
+python -m venv myenv
+
+# Activate on Windows
+myenv\\Scripts\\activate
+
+# Activate on Linux/Mac
+source myenv/bin/activate
+\`\`\`
+
+### Install Packages:
+\`\`\`bash
+pip install package-name
+\`\`\`
+
+### Freeze Dependencies:
+\`\`\`bash
+pip freeze > requirements.txt
+\`\`\`
+
+### Install from Requirements:
+\`\`\`bash
+pip install -r requirements.txt
+\`\`\`
+
+## Using conda:
+
+\`\`\`bash
+# Create environment
+conda create -n myenv python=3.9
+
+# Activate
+conda activate myenv
+
+# Install packages
+conda install numpy pandas
+
+# Export environment
+conda env export > environment.yml
+\`\`\`
+
+## Best Practices:
+- One virtual environment per project
+- Always activate before working
+- Keep requirements.txt updated
+- Add venv/ to .gitignore
+- Document Python version requirements`,
+        excerpt: "Complete guide to creating and managing Python virtual environments for project isolation.",
+        status: "PENDING",
+        author: sarahWilson._id,
+        category: devCategory._id,
+        tags: [],
+        views: 0,
+      },
+
+      // REJECTED ARTICLES
+      {
+        title: "10 Ways to Code Faster",
+        content: `Just use shortcuts and code every day. Practice makes perfect.
+
+Here are some tips:
+1. Use shortcuts
+2. Code more
+3. Learn your IDE
+4. Use snippets
+5. Type faster
+
+That's it!`,
+        excerpt: "Tips to improve coding speed.",
+        status: "REJECTED",
+        author: mikeJohnson._id,
+        category: devCategory._id,
+        tags: [],
+        rejectionReason: "Content is too brief and lacks technical depth. Please provide detailed explanations, code examples, and actionable insights.",
+        views: 0,
+      },
+      {
+        title: "Best Programming Language 2026",
+        content: `Python is the best programming language because everyone uses it. 
+
+JavaScript is also good but Python is better.
+
+You should learn Python first then JavaScript.
+
+C++ is too hard don't use it.
+
+Java is old.`,
+        excerpt: "Comparison of programming languages.",
+        status: "REJECTED",
+        author: emilyBrown._id,
+        category: techCategory._id,
+        tags: [],
+        rejectionReason: "Article contains subjective opinions without supporting evidence or data. Please provide objective comparisons with use cases, benchmarks, and specific examples.",
+        views: 0,
+      },
+      {
+        title: "How I Fixed My Computer",
+        content: `My computer was not working so I restarted it and it worked.
+
+Sometimes you just need to turn it off and on again.
+
+If that doesn't work try restarting again.`,
+        excerpt: "Computer troubleshooting.",
+        status: "REJECTED",
+        author: johnDoe._id,
+        category: tutorialCategory._id,
+        tags: [],
+        rejectionReason: "Article does not meet knowledge base standards. Content is too generic and not relevant to our technical documentation needs.",
+        views: 0,
       },
     ]);
     console.log("✅ Sample articles created");
@@ -374,14 +673,20 @@ db.grantRolesToUser("appUser", [
     console.log("Admin:");
     console.log("  Email: admin@kambaa.in");
     console.log("  Password: admin123");
-    console.log("\nEmployee:");
-    console.log("  Email: john.doe@kambaa.in");
-    console.log("  Password: employee123");
+    console.log("\nEmployees:");
+    console.log("  Email: john.doe@kambaa.in | Password: employee123");
+    console.log("  Email: jane.smith@kambaa.in | Password: employee123");
+    console.log("  Email: sarah.wilson@kambaa.in | Password: employee123");
+    console.log("  Email: mike.johnson@kambaa.in | Password: employee123");
+    console.log("  Email: emily.brown@kambaa.in | Password: employee123");
     console.log("\n📊 Data Created:");
-    console.log("  - 2 Users (1 Admin, 2 Employees)");
+    console.log("  - 6 Users (1 Admin, 5 Employees)");
     console.log("  - 6 Categories");
     console.log("  - 10 Tags");
-    console.log("  - 5 Approved Articles (ready for chatbot)");
+    console.log("  - 11 Total Articles:");
+    console.log("    • 3 APPROVED (ready for chatbot)");
+    console.log("    • 5 PENDING (waiting for admin approval)");
+    console.log("    • 3 REJECTED (with rejection reasons)");
     console.log("\n");
 
     await mongoose.disconnect();
